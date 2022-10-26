@@ -1,0 +1,14 @@
+version: '3'
+services:
+  solr:
+    image: solr
+    environment:
+      - SOLR_MODULES=analysis-extras
+    ports:
+     - "8983:8983"
+    volumes:
+      - ./configset:/var/solr/configsets/dialogs
+    command: solr-create -c dialogs -d /var/solr/configsets/dialogs
+      - data:/var/solr
+volumes:
+  data:

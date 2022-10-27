@@ -8,8 +8,8 @@ services:
      - "8983:8983"
     volumes:
       - ./solr/configset:/var/solr/configsets/dialogs
-    command: solr-create -c dialogs -d /var/solr/configsets/dialogs
       - data:/var/solr
+    command: solr-create -c dialogs -d /var/solr/configsets/dialogs
   streamlit:
     build: streamlit
     ports:

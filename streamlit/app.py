@@ -1,37 +1,33 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
+import json
+from urllib.request import urlopen
+from urllib.parse import quote_plus
+
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
+SOLR_URL = "http://localhost:8983/solr/#/dialogs/"
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+def query_solr(query:str) -> str:
+    """
+    Function to query the Solr database with a question
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+    Parameters
+    ----------
+        query, str:
+            The question to be searched
+    """
+    if query is not None:
+        query_string = f"Q:\"{query}\""
+        query_url = SOLR_URL +"select?q=" +quote_plus(query_string)
+        with urlopen(query_url) as connection:
+            response = json.load(connection)
+            if response['response']['numFound'] == 0:
+                return None
+            return response['response']['docs'][0]['A']
+    return None
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
-
-with st.echo(code_location='below'):
-   total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-   num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-   Point = namedtuple('Point', 'x y')
-   data = []
-
-   points_per_turn = total_points / num_turns
-
-   for curr_point_num in range(total_points):
-      curr_turn, i = divmod(curr_point_num, points_per_turn)
-      angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-      radius = curr_point_num / total_points
-      x = radius * math.cos(angle)
-      y = radius * math.sin(angle)
-      data.append(Point(x, y))
-
-   st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-      .mark_circle(color='#0068c9', opacity=0.5)
-      .encode(x='x:Q', y='y:Q'))
+if __name__=="__main__":
+    st.title("Sparse Retrieval QA")
+    question = st.text_input("Enter question")
+    if question:
+        answer = query_solr(question)
+        st.write(answer)

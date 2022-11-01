@@ -12,6 +12,8 @@ services:
     command: solr-create -c dialogs -d /var/solr/configsets/dialogs
   streamlit:
     build: streamlit
+    volumes:
+      - ./streamlit:/app
     ports:
       - "80:80"
 volumes:

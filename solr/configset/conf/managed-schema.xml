@@ -1036,6 +1036,4 @@
         <filter name="lowercase"/>
       </analyzer>
     </fieldType>
-    <field name="Q" type="text_pl" indexed="true" stored="true" required="true" multiValued="false"/>
-    <field name="A" type="text_pl" indexed="true" stored="true" required="true" multiValued="false"/>
 </schema>

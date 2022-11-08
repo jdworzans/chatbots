@@ -17,15 +17,21 @@ def query_solr(query: str, language: str) -> str:
             Question language abbreviation
     """
     if query is None:
-        return None
-    r = requests.get(SOLR_URL, json={"query": f"Q_txt_{language}:{query}"})
+        return None, None
+    solr_query = f"Q_txt_{language}: {query} OR "
+    solr_query += " OR ".join([f"Q_txt_{language}:{t}" for t in query.split()])
+    r = requests.get(SOLR_URL, json={"query": solr_query, "params": {"debugQuery": True}})
     if not r.ok:
-        return None
+        return None, r.text
     response = r.json()
     docs = response["response"]["docs"]
     if not docs:
-        return None
-    return docs[0][f"A_txt_{language}"]
+        return None, response
+    info = {
+        "solr_query": solr_query,
+        "response": response,
+    }
+    return docs[0][f"A_txt_{language}"], info
 
 
 if __name__ == "__main__":
@@ -33,5 +39,8 @@ if __name__ == "__main__":
     language = st.radio(label="Language", options=["PL", "EN"])
     question = st.text_input("Enter question")
     if question:
-        answer = query_solr(question, language.lower())
+        answer, info = query_solr(question, language.lower())
         st.write(answer)
+        more_info = st.checkbox("Show details")
+        if more_info:
+            st.write(info)

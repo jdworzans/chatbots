@@ -1,37 +1,46 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
+import requests
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+SOLR_URL = "http://solr:8983/solr/dialogs/query"
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+def query_solr(query: str, language: str) -> str:
+    """
+    Function to query the Solr database with a question
 
-with st.echo(code_location='below'):
-   total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-   num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+    Parameters
+    ----------
+        query, str:
+            The question to be searched
+        language, str:
+            Question language abbreviation
+    """
+    if query is None:
+        return None, None
+    solr_query = f"Q_txt_{language}: {query} OR "
+    solr_query += " OR ".join([f"Q_txt_{language}:{t}" for t in query.split()])
+    r = requests.get(SOLR_URL, json={"query": solr_query, "params": {"debugQuery": True}})
+    if not r.ok:
+        return None, r.text
+    response = r.json()
+    docs = response["response"]["docs"]
+    if not docs:
+        return None, response
+    info = {
+        "solr_query": solr_query,
+        "response": response,
+    }
+    return docs[0][f"A_txt_{language}"], info
 
-   Point = namedtuple('Point', 'x y')
-   data = []
 
-   points_per_turn = total_points / num_turns
-
-   for curr_point_num in range(total_points):
-      curr_turn, i = divmod(curr_point_num, points_per_turn)
-      angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-      radius = curr_point_num / total_points
-      x = radius * math.cos(angle)
-      y = radius * math.sin(angle)
-      data.append(Point(x, y))
-
-   st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-      .mark_circle(color='#0068c9', opacity=0.5)
-      .encode(x='x:Q', y='y:Q'))
+if __name__ == "__main__":
+    st.title("Sparse Retrieval QA")
+    language = st.radio(label="Language", options=["PL", "EN"])
+    question = st.text_input("Enter question")
+    if question:
+        answer, info = query_solr(question, language.lower())
+        st.write(answer)
+        more_info = st.checkbox("Show details")
+        if more_info:
+            st.write(info)

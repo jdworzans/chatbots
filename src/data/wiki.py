@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 while l := next(lines).strip():
                     content_lines.append(l)
                 content = " ".join(content_lines)
-                data.append({"title": title, "content": content})
+                data.append({"title_txt_pl": title, "content_txt_pl": content})
         except StopIteration:
             pass
 

@@ -54,8 +54,8 @@ def query_wiki(query: str) -> Tuple[List, str]:
     if query is None:
         return [], ""
 
-    solr_query = f"content: {query} OR "
-    solr_query += " OR ".join([f"content:{t}" for t in query.split()])
+    solr_query = f"content_txt_pl: {query} OR "
+    solr_query += " OR ".join([f"content_txt_pl:{t}" for t in query.split()])
 
     r = requests.get(
         SOLR_URL,
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     elif q_type == "Question":
         docs, info = query_wiki(question)
         if docs:
-            context = docs[0]["content"][0]
+            context = docs[0]["content_txt_pl"][0]
             result = readers["PL"].answer(question, context)
             st.write(result['answer'])
 

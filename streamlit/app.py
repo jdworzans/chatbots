@@ -95,8 +95,14 @@ if __name__ == "__main__":
     elif q_type == "Question":
         docs, info = query_wiki(question)
         if docs:
-            context = docs[0]["content_txt_pl"][0]
-            result = readers["PL"].answer(question, context)
+            if len(docs) >= 10:
+                contexts = [docs[i]["content_txt_pl"][0] for i in range(10)]
+            elif len(docs) < 10:
+                contexts = [docs[i]["content_txt_pl"][0] for i in range(len(docs))]
+            results = [readers["PL"].answer(question, context) for context in contexts]
+            scores = [result['score'] for result in results]
+            idx_max = scores.index(max(scores))
+            result = results[idx_max]
             st.write(result['answer'])
 
             if more_info:

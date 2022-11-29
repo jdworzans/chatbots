@@ -1,6 +1,8 @@
+import pandas as pd
 import requests
+from reader import readers
+
 import streamlit as st
-from reader import Reader
 
 SOLR_URL = "http://solr:8983/solr/dialogs/query"
 
@@ -43,21 +45,33 @@ def query_solr(query: str, language: str) -> str:
 if __name__ == "__main__":
     st.title("Sparse Retrieval QA")
 
-    reader = Reader()
-
     language = st.radio(label="Language", options=["PL", "EN"])
+    q_type = st.radio(label="Type", options=["Chat", "Question"])
     question = st.text_input("Enter question")
+    more_info = st.checkbox("Show details")
 
-    if question:
+    if q_type == "Chat":
+        answer, info = query_solr(question, language.lower())
+        st.write(answer)
+        if more_info:
+            st.caption("Solr")
+            docs = pd.DataFrame(info["response"].get("response", {}).get("docs", [])).drop(
+                columns=["id", "_version_"], errors="ignore",
+            )
+            st.dataframe(docs, use_container_width=True)
+
+    elif q_type == "Question":
         context, info = query_solr(question, language.lower())
-        result = reader.answer(question, context, language.lower())
+        result = readers[language].answer(question, context)
 
         st.write(result['answer'])
 
-        more_info = st.checkbox("Show details")
         if more_info:
             st.caption("Solr")
-            st.write(info)
+            docs = pd.DataFrame(info["response"].get("response", {}).get("docs", [])).drop(
+                columns=["id", "_version_"], errors="ignore",
+            )
+            st.dataframe(docs, use_container_width=True)
 
             st.caption("Reader")
             st.write(result)

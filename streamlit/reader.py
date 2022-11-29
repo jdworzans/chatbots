@@ -28,6 +28,6 @@ class Reader:
 
 
 readers = {
-    "PL": Reader("deepset/roberta-base-squad2"),
-    "EN": Reader("henryk/bert-base-multilingual-cased-finetuned-polish-squad2"),
+    "EN": Reader("deepset/roberta-base-squad2"),
+    "PL": Reader("henryk/bert-base-multilingual-cased-finetuned-polish-squad2"),
 }

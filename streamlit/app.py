@@ -96,9 +96,9 @@ if __name__ == "__main__":
         docs, info = query_wiki(question)
         if docs:
             if len(docs) >= 10:
-                contexts = [docs[i]["content_txt_pl"][0] for i in range(10)]
+                contexts = [docs[i]["content_txt_pl"] for i in range(10)]
             elif len(docs) < 10:
-                contexts = [docs[i]["content_txt_pl"][0] for i in range(len(docs))]
+                contexts = [docs[i]["content_txt_pl"] for i in range(len(docs))]
             results = [readers["PL"].answer(question, context) for context in contexts]
             scores = [result['score'] for result in results]
             idx_max = scores.index(max(scores))
@@ -112,6 +112,6 @@ if __name__ == "__main__":
                 st.dataframe(docs, use_container_width=True)
 
                 st.caption("Reader")
-                st.write(info["response"]["debug"]["explain"])
-                st.write(info)
-                st.write(result)
+                #st.write(info["response"]["debug"]["explain"])
+                #st.write(info)
+                st.write(results)

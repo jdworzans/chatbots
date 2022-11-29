@@ -1034,6 +1034,7 @@
         <filter name="morfologik" dictionary="morfologik/stemming/polish/polish.dict"/>
         <!-- <filter name="morfologik" dictionary="morfologik/polish.dict"/> -->
         <filter name="lowercase"/>
+        <filter name="stop" ignoreCase="false" words="lang/stopwords_pl.txt" />
       </analyzer>
     </fieldType>
 </schema>

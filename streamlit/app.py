@@ -104,7 +104,6 @@ if __name__ == "__main__":
             idx_max = scores.index(max(scores))
             result = results[idx_max]
             st.write(result['answer'])
-
             if more_info:
                 st.caption("Solr")
                 docs = pd.DataFrame(info["response"].get("response", {}).get("docs", [])).drop(
@@ -113,4 +112,6 @@ if __name__ == "__main__":
                 st.dataframe(docs, use_container_width=True)
 
                 st.caption("Reader")
+                st.write(info["response"]["debug"]["explain"])
+                st.write(info)
                 st.write(result)

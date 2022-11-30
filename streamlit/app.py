@@ -115,3 +115,30 @@ if __name__ == "__main__":
                 #st.write(info["response"]["debug"]["explain"])
                 #st.write(info)
                 st.write(results)
+
+# Getting our answers from professor's questions
+# if __name__ == "__main__":
+#     q_type = "Question"
+#     our_answers = list()
+#     for q in open('questions500.txt'):
+#         question = q
+#         st.caption(len(our_answers))
+#         st.caption(question)
+#         docs, info = query_wiki(question)
+#         if docs:
+#             if len(docs) >= 10:
+#                 contexts = [docs[i]["content_txt_pl"] for i in range(10)]
+#             elif len(docs) < 10:
+#                 contexts = [docs[i]["content_txt_pl"] for i in range(len(docs))]
+#             results = [readers["PL"].answer(question, context) for context in contexts]
+#             scores = [result['score'] for result in results]
+#             idx_max = scores.index(max(scores))
+#             result = results[idx_max]
+#             our_answers.append(result['answer'])
+#         else:
+#             our_answers.append('No result found')
+#         st.caption(our_answers[-1])
+               
+#     with open('found_answers.txt', 'w') as f:
+#         for line in our_answers:
+#             f.write(f"{line}\n")

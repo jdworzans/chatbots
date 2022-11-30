@@ -11,10 +11,23 @@ services:
       - data:/var/solr
     command: solr-create -c dialogs -d /var/solr/configsets/dialogs
   streamlit:
-    build: streamlit
+    build: .
+    entrypoint: ["python", "-m", "streamlit", "run", "streamlit/app.py", "--server.port=80", "--server.address=0.0.0.0"]
     volumes:
-      - ./streamlit:/app
+      - .:/app
+      - models:/models
     ports:
       - "80:80"
+    environment:
+      TRANSFORMERS_CACHE: /models
+  work:
+    build: .
+    volumes:
+      - ./data:/data
+      - .:/app
+      - models:/models
+    environment:
+      TRANSFORMERS_CACHE: /models
 volumes:
   data:
+  models:

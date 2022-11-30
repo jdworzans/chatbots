@@ -27,7 +27,7 @@ class Reader:
         return self.model({'question': query, 'context': context})
 
 
-readers = {
+READERS = {
     "EN": Reader("deepset/roberta-base-squad2"),
     "PL": Reader("henryk/bert-base-multilingual-cased-finetuned-polish-squad2"),
 }

@@ -21,8 +21,8 @@ def query_solr(query: str, language: str) -> Tuple[str, Dict]:
     if query is None:
         return None, None
 
-    solr_query = f"Q_txt_{language}: {query} OR "
-    solr_query += " OR ".join([f"Q_txt_{language}:{t}" for t in query.split()])
+    solr_query = f"title_txt_{language}: {query} OR "
+    solr_query += " OR ".join([f"title_txt_{language}:{t}" for t in query.split()])
 
     r = requests.get(
         SOLR_URL,
@@ -39,7 +39,7 @@ def query_solr(query: str, language: str) -> Tuple[str, Dict]:
         "solr_query": solr_query,
         "response": response,
     }
-    return docs[0][f"A_txt_{language}"], info
+    return docs[0][f"content_txt_{language}"], info
 
 if __name__ == "__main__":
     st.title("Sparse Retrieval QA")
@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
     if q_type == "Chat":
         language = st.radio(label="Language", options=["PL", "EN"])
+        question = question.lower().removeprefix("jak nazywa się")
         answer, info = query_solr(question, language.lower())
         st.write(answer)
         if more_info:

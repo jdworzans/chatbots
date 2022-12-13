@@ -44,7 +44,7 @@ class Answerer:
                 return "Nie udało się połączyć z solr"
         if not docs:
             return ""
-        results = [READERS["PL"].answer(question, d["content_txt_pl"]) for d in docs]
+        results = READERS["PL"].answer(question, [d["content_txt_pl"] for d in docs])
         best = max(results, key=lambda result: result["score"])
 
         self.extra["readers"] = pd.DataFrame(docs).join(pd.DataFrame(results))

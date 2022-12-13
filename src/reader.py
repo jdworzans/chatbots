@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from transformers import pipeline
 
 
@@ -20,11 +22,14 @@ class Reader:
             cache_dir="cache"
         )
 
-    def answer(self, query: str, context: str) -> dict:
+    def answer(self, query: str, contexts: Union[str, List[str]]) -> dict:
         """
         Returns answer to a question given context and query.
         """
-        return self.model({'question': query, 'context': context})
+        if isinstance(contexts, str):
+            contexts = [contexts]
+        questions = [{"question": query, "context": context} for context in contexts]
+        return self.model(questions)
 
 
 READERS = {

@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Tuple
 
 import pandas as pd
@@ -41,12 +42,18 @@ def query_solr(query: str, language: str) -> Tuple[str, Dict]:
     }
     return docs[0][f"content_txt_{language}"], info
 
+def tokenize(word):
+    return filter(None, [
+        re.search("\w*", t)[0]
+        for t in word.lower().split()
+    ])
+
 if __name__ == "__main__":
     st.title("Sparse Retrieval QA")
     from src import qa
     answerer = qa.Answerer(SOLR_URL)
 
-    q_type = st.radio(label="Type", options=["Chat", "Question"])
+    q_type = st.radio(label="Type", options=["Chat", "Question", "Optional"])
     question = st.text_input("Enter question")
     more_info = st.checkbox("Show details")
 
@@ -65,8 +72,31 @@ if __name__ == "__main__":
     elif q_type == "Question":
         result = answerer.answer(question)
         if more_info:
-            st.dataframe(answerer.extra["readers"][["title_txt_pl", "content_txt_pl", "score", "answer"]])
+            st.dataframe(answerer.extra["readers"][["score", "answer", "title_txt_pl", "content_txt_pl"]])
             st.write(answerer.extra.get("solr", {}))
+
+    elif q_type == "Optional":
+        if question:
+            try:
+                description, *opts = re.findall("(.*?) to (.*?)(?:, (.*?))* czy (.*?)\?", question)[0]
+                counts = []
+                description_query = " OR ".join([f"content_txt_pl:{t}" for t in tokenize(description)])
+                for opt in filter(None, opts):
+                    opt_query = " OR ".join([f"content_txt_pl:{t}" for t in tokenize(opt)])
+                    solr_query = f"{description_query} AND {opt_query}"
+                    r = requests.get(
+                        SOLR_URL,
+                        json={"query": solr_query}
+                    )
+                    response = r.json()
+                    counts.append((response["response"]["numFound"], opt))
+                counts = sorted(counts, reverse=True)
+                results = pd.DataFrame(counts)
+                st.write(counts[0][1])
+                if more_info:
+                    st.dataframe(results)
+            except ValueError:
+                st.write("Coudn't match the question")
 
 # Getting our answers from professor's questions
 # if __name__ == "__main__":

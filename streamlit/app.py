@@ -23,7 +23,9 @@ def query_solr(query: str, language: str) -> Tuple[str, Dict]:
         return None, None
 
     solr_query = f"title_txt_{language}: {query} OR "
-    solr_query += " OR ".join([f"title_txt_{language}:{t}" for t in query.split()])
+    solr_query += " OR ".join(
+        [f"title_txt_{language}:{t}" for t in query.split()]
+    )
 
     r = requests.get(
         SOLR_URL,
@@ -42,11 +44,13 @@ def query_solr(query: str, language: str) -> Tuple[str, Dict]:
     }
     return docs[0][f"content_txt_{language}"], info
 
+
 def tokenize(word):
     return filter(None, [
         re.search("\w*", t)[0]
         for t in word.lower().split()
     ])
+
 
 if __name__ == "__main__":
     st.title("Sparse Retrieval QA")
@@ -64,7 +68,9 @@ if __name__ == "__main__":
         st.write(answer)
         if more_info:
             st.caption("Solr")
-            docs = pd.DataFrame(info["response"].get("response", {}).get("docs", [])).drop(
+            docs = pd.DataFrame(
+                info["response"].get("response", {}).get("docs", [])
+            ).drop(
                 columns=["id", "_version_"], errors="ignore",
             )
             st.dataframe(docs, use_container_width=True)
@@ -72,17 +78,25 @@ if __name__ == "__main__":
     elif q_type == "Question":
         result = answerer.answer(question)
         if more_info:
-            st.dataframe(answerer.extra["readers"][["score", "answer", "title_txt_pl", "content_txt_pl"]])
+            st.dataframe(answerer.extra["readers"][
+                ["score", "answer", "title_txt_pl", "content_txt_pl"]
+            ])
             st.write(answerer.extra.get("solr", {}))
 
     elif q_type == "Optional":
         if question:
             try:
-                description, *opts = re.findall("(.*?) to (.*?)(?:, (.*?))* czy (.*?)\?", question)[0]
+                description, *opts = re.findall(
+                    "(.*?) to (.*?)(?:, (.*?))* czy (.*?)\?", question
+                )[0]
                 counts = []
-                description_query = " OR ".join([f"content_txt_pl:{t}" for t in tokenize(description)])
+                description_query = " OR ".join(
+                    [f"content_txt_pl:{t}" for t in tokenize(description)]
+                )
                 for opt in filter(None, opts):
-                    opt_query = " OR ".join([f"content_txt_pl:{t}" for t in tokenize(opt)])
+                    opt_query = " OR ".join(
+                        [f"content_txt_pl:{t}" for t in tokenize(opt)]
+                    )
                     solr_query = f"{description_query} AND {opt_query}"
                     r = requests.get(
                         SOLR_URL,
@@ -111,8 +125,12 @@ if __name__ == "__main__":
 #             if len(docs) >= 10:
 #                 contexts = [docs[i]["content_txt_pl"] for i in range(10)]
 #             elif len(docs) < 10:
-#                 contexts = [docs[i]["content_txt_pl"] for i in range(len(docs))]
-#             results = [readers["PL"].answer(question, context) for context in contexts]
+#                 contexts = [
+#                    docs[i]["content_txt_pl"] for i in range(len(docs))
+#                 ]
+#             results = [
+#               readers["PL"].answer(question, context) for context in contexts
+#             ]
 #             scores = [result['score'] for result in results]
 #             idx_max = scores.index(max(scores))
 #             result = results[idx_max]
@@ -120,7 +138,6 @@ if __name__ == "__main__":
 #         else:
 #             our_answers.append('No result found')
 #         st.caption(our_answers[-1])
-               
 #     with open('found_answers.txt', 'w') as f:
 #         for line in our_answers:
 #             f.write(f"{line}\n")

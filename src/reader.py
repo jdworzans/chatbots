@@ -29,11 +29,13 @@ class Reader:
         """
         if isinstance(contexts, str):
             contexts = [contexts]
-        questions = [{"question": query, "context": context} for context in contexts]
+        questions = [
+            {"question": query, "context": context} for context in contexts
+        ]
         return self.model(questions)
 
 
 READERS = {
     "EN": Reader("deepset/roberta-base-squad2"),
-    "PL": Reader("henryk/bert-base-multilingual-cased-finetuned-polish-squad2"),
+    "PL": Reader("azwierzc/herbert-large-poquad")
 }

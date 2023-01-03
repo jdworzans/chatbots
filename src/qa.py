@@ -49,12 +49,11 @@ class Answerer:
             return "Nie udało się połączyć z solr"
         if not docs:
             return ""
-        results = READERS["PL"].answer(question, [d["content_txt_pl"] for d in docs])
-        best = max(filter(lambda result: result["answer"], results), key=lambda result: result["score"], default={"answer": ""})
-        if not best["answer"]:
-            best = {"answer": docs[0]["title_txt_pl"]}
-        self.extra["readers"] = pd.DataFrame(docs).join(pd.DataFrame(results))
-        return best["answer"]
+        for d in docs[:1]:
+            result = READERS["PL"].answer(question, [d["content_txt_pl"]])
+            if result["answer"]:
+                return result["answer"]
+        return docs[0]["title_txt_pl"]
 
 if __name__ == "__main__":
     from tqdm import tqdm

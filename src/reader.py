@@ -19,7 +19,8 @@ class Reader:
             "question-answering",
             model=self.model_name,
             tokenizer=self.model_name,
-            cache_dir="cache"
+            cache_dir="cache",
+            handle_impossible_answer=True,
         )
 
     def answer(self, query: str, contexts: Union[str, List[str]]) -> dict:
